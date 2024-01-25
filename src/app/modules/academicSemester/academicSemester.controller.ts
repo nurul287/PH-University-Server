@@ -1,5 +1,4 @@
 import httpStatus from 'http-status';
-import { Types } from 'mongoose';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { AcademicSemesterServices } from './academicSemester.service';
@@ -29,9 +28,9 @@ const getAllAcademicSemester = catchAsync(async (req, res) => {
 });
 
 const getSingleAcademicSemester = catchAsync(async (req, res) => {
-  const result = await AcademicSemesterServices.getSingleAcademicSemesterFromDB(
-    new Types.ObjectId(req.params.id),
-  );
+  const { semesterId } = req.params;
+  const result =
+    await AcademicSemesterServices.getSingleAcademicSemesterFromDB(semesterId);
 
   sendResponse(res, {
     success: true,
@@ -41,10 +40,11 @@ const getSingleAcademicSemester = catchAsync(async (req, res) => {
   });
 });
 
-const updateSingleAcademicSemester = catchAsync(async (req, res) => {
+const updateAcademicSemester = catchAsync(async (req, res) => {
+  const { semesterId } = req.params;
   const result =
     await AcademicSemesterServices.updateSingleAcademicSemesterIntoDB(
-      new Types.ObjectId(req.params.id),
+      semesterId,
       req.body,
     );
 
@@ -60,5 +60,5 @@ export const AcademicSemesterControllers = {
   createAcademicSemester,
   getAllAcademicSemester,
   getSingleAcademicSemester,
-  updateSingleAcademicSemester,
+  updateAcademicSemester,
 };

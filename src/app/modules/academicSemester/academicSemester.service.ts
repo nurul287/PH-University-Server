@@ -1,4 +1,3 @@
-import { Types } from 'mongoose';
 import { AcademicSemesterNameCodeMapper } from './academicSemester.constant';
 import { TAcademicSemester } from './academicSemester.interface';
 import { AcademicSemester } from './academicSemester.model';
@@ -16,19 +15,29 @@ const getAllAcademicSemesterFromDB = async () => {
   return result;
 };
 
-const getSingleAcademicSemesterFromDB = async (id: Types.ObjectId) => {
-  const result = await AcademicSemester.findOne({ _id: id });
+const getSingleAcademicSemesterFromDB = async (semesterId: string) => {
+  const result = await AcademicSemester.findById(semesterId);
   return result;
 };
 const updateSingleAcademicSemesterIntoDB = async (
-  id: Types.ObjectId,
+  semesterId: string,
   payLoad: TAcademicSemester,
 ) => {
-  const doc = await AcademicSemester.findOne({ _id: id });
-  if (doc) {
-    await AcademicSemester.updateOne({ _id: id }, payLoad);
-    return {};
+  if (
+    payLoad.name &&
+    payLoad.code &&
+    AcademicSemesterNameCodeMapper[payLoad.name] !== payLoad.code
+  ) {
+    throw new Error('Invalid semester code!');
   }
+  const result = await AcademicSemester.findOneAndUpdate(
+    { _id: semesterId },
+    payLoad,
+    {
+      new: true,
+    },
+  );
+  return result;
 };
 
 export const AcademicSemesterServices = {
