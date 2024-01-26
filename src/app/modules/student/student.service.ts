@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import AppError from '../../errors/AppError';
 import { User } from '../user/user.model';
+import { TStudent } from './student.interface';
 import { Student } from './student.model';
 
 const getAllStudentsFromBD = async () => {
@@ -17,7 +18,7 @@ const getAllStudentsFromBD = async () => {
 };
 
 const getSingleStudentFromBD = async (id: string) => {
-  const result = await Student.findById(id)
+  const result = await Student.findOne({ id })
     .populate('admissionSemester')
     .populate({
       path: 'academicDepartment',
@@ -62,11 +63,42 @@ const deleteStudentFromBD = async (id: string) => {
   } catch (error) {
     await session.abortTransaction();
     await session.endSession();
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to deleted student');
   }
+};
+
+const updateStudentFromDB = async (id: string, payLoad: Partial<TStudent>) => {
+  const isUserExists = await Student.isUserExists(id);
+  if (!isUserExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This Student does not exists!');
+  }
+  const { name, guardian, localGuardian, ...remainingData } = payLoad;
+  const modifiedUpdateData: Record<string, unknown> = { ...remainingData };
+  if (name && Object.keys(name).length) {
+    for (const [key, value] of Object.entries(name)) {
+      modifiedUpdateData[`name.${key}`] = value;
+    }
+  }
+  if (guardian && Object.keys(guardian).length) {
+    for (const [key, value] of Object.entries(guardian)) {
+      modifiedUpdateData[`guardian.${key}`] = value;
+    }
+  }
+  if (localGuardian && Object.keys(localGuardian).length) {
+    for (const [key, value] of Object.entries(localGuardian)) {
+      modifiedUpdateData[`localGuardian.${key}`] = value;
+    }
+  }
+
+  const result = await Student.findOneAndUpdate({ id }, modifiedUpdateData, {
+    new: true,
+  });
+  return result;
 };
 
 export const StudentServices = {
   getAllStudentsFromBD,
   getSingleStudentFromBD,
   deleteStudentFromBD,
+  updateStudentFromDB,
 };
