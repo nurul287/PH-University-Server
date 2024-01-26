@@ -21,7 +21,7 @@ const getAllAcademicSemester = catchAsync(async (req, res) => {
 
   sendResponse(res, {
     success: true,
-    message: 'Academic semesters is fetched successfully',
+    message: 'Academic semesters are fetched successfully',
     data: result,
     statusCode: httpStatus.OK,
   });
