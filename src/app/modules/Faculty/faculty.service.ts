@@ -22,7 +22,7 @@ const getAllFacultiesFromBD = async (query: Record<string, unknown>) => {
 };
 
 const getSingleFacultyFromBD = async (id: string) => {
-  const result = await Faculty.findOne({ id }).populate('admissionSemester');
+  const result = await Faculty.findById(id).populate('admissionSemester');
   return result;
 };
 
@@ -36,22 +36,24 @@ const deleteFacultyFromBD = async (id: string) => {
       throw new AppError(httpStatus.NOT_FOUND, 'This faculty does not exists!');
     }
 
-    const deletedUser = await User.findOneAndUpdate(
-      { id },
-      { isDeleted: true },
-      { new: true, session },
-    );
-    if (!deletedUser) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to deleted user');
-    }
-
-    const deleteFaculty = await Faculty.findOneAndUpdate(
-      { id },
+    const deleteFaculty = await Faculty.findByIdAndUpdate(
+      id,
       { isDeleted: true },
       { new: true, session },
     );
     if (!deleteFaculty) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to deleted faculty');
+    }
+
+    const userId = deleteFaculty.user;
+
+    const deletedUser = await User.findOneAndUpdate(
+      userId,
+      { isDeleted: true },
+      { new: true, session },
+    );
+    if (!deletedUser) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to deleted user');
     }
 
     await session.commitTransaction();
@@ -78,7 +80,7 @@ const updateFacultyFromDB = async (id: string, payLoad: Partial<TFaculty>) => {
     }
   }
 
-  const result = await Faculty.findOneAndUpdate({ id }, modifiedUpdateData, {
+  const result = await Faculty.findByIdAndUpdate(id, modifiedUpdateData, {
     new: true,
     runValidators: true,
   });

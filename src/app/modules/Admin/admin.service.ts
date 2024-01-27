@@ -19,7 +19,7 @@ const getAllAdminsFromBD = async (query: Record<string, unknown>) => {
 };
 
 const getSingleAdminFromBD = async (id: string) => {
-  const result = await Admin.findOne({ id });
+  const result = await Admin.findById(id);
   return result;
 };
 
@@ -32,23 +32,23 @@ const deleteAdminFromBD = async (id: string) => {
     if (!isUserExists) {
       throw new AppError(httpStatus.NOT_FOUND, 'This admin does not exists!');
     }
-
-    const deletedUser = await User.findOneAndUpdate(
-      { id },
-      { isDeleted: true },
-      { new: true, session },
-    );
-    if (!deletedUser) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to deleted user');
-    }
-
-    const deleteAdmin = await Admin.findOneAndUpdate(
-      { id },
+    const deleteAdmin = await Admin.findByIdAndUpdate(
+      id,
       { isDeleted: true },
       { new: true, session },
     );
     if (!deleteAdmin) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to deleted admin');
+    }
+
+    const userId = deleteAdmin.user;
+    const deletedUser = await User.findByIdAndUpdate(
+      userId,
+      { isDeleted: true },
+      { new: true, session },
+    );
+    if (!deletedUser) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to deleted user');
     }
 
     await session.commitTransaction();
@@ -75,7 +75,7 @@ const updateAdminFromDB = async (id: string, payLoad: Partial<TAdmin>) => {
     }
   }
 
-  const result = await Admin.findOneAndUpdate({ id }, modifiedUpdateData, {
+  const result = await Admin.findById(id, modifiedUpdateData, {
     new: true,
     runValidators: true,
   });
