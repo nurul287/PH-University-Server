@@ -1,12 +1,6 @@
 import { Schema, model } from 'mongoose';
 import validator from 'validator';
-import {
-  TGuardian,
-  TLocalGuardian,
-  TStudent,
-  TStudentModel,
-  TUserName,
-} from './student.interface';
+import { TFaculty, TFacultyModel, TUserName } from './faculty.interface';
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -39,69 +33,17 @@ const userNameSchema = new Schema<TUserName>({
   },
 });
 
-const guardianSchema = new Schema<TGuardian>({
-  fatherName: {
-    type: String,
-    required: [true, 'Father name is required'],
-    trim: true,
-  },
-  fatherOccupation: {
-    type: String,
-    required: [true, 'Father Occupation is required'],
-    trim: true,
-  },
-  fatherContactNo: {
-    type: String,
-    required: [true, 'Father contact number is required'],
-    trim: true,
-  },
-  motherName: {
-    type: String,
-    required: [true, 'Mother name is required'],
-    trim: true,
-  },
-  motherOccupation: {
-    type: String,
-    required: [true, 'Mother Occupation is required'],
-    trim: true,
-  },
-  motherContactNo: {
-    type: String,
-    required: [true, 'Mother contact number is required'],
-    trim: true,
-  },
-});
-
-const localGuardianSchema = new Schema<TLocalGuardian>({
-  name: {
-    type: String,
-    required: [true, 'Local guardian name is required'],
-    trim: true,
-  },
-  occupation: {
-    type: String,
-    required: [true, 'Local guardian occupation is required'],
-    trim: true,
-  },
-  contactNo: {
-    type: String,
-    required: [true, 'Local guardian contact number is required'],
-    trim: true,
-  },
-  address: {
-    type: String,
-    required: [true, 'Local guardian address is required'],
-    trim: true,
-  },
-});
-
-const studentSchema = new Schema<TStudent, TStudentModel>(
+const facultySchema = new Schema<TFaculty, TFacultyModel>(
   {
     id: {
       type: String,
       required: [true, 'Student ID is required'],
       unique: true,
       trim: true,
+    },
+    designation: {
+      type: String,
+      required: [true, 'Designation is required'],
     },
     user: {
       type: Schema.Types.ObjectId,
@@ -152,23 +94,11 @@ const studentSchema = new Schema<TStudent, TStudentModel>(
       required: [true, 'Permanent address is required'],
       trim: true,
     },
-    guardian: {
-      type: guardianSchema,
-      required: [true, 'TGuardian information is required'],
-    },
-    localGuardian: {
-      type: localGuardianSchema,
-      required: [true, 'Local guardian information is required'],
-    },
     profileImg: { type: String, trim: true },
-    admissionSemester: {
-      type: Schema.Types.ObjectId,
-      required: [true, 'Admission semester id is required'],
-      ref: 'AcademicSemester',
-    },
     academicDepartment: {
       type: Schema.Types.ObjectId,
-      ref: 'AcademicDepartment',
+      required: [true, 'User id is required'],
+      ref: 'User',
     },
     isDeleted: {
       type: Boolean,
@@ -183,29 +113,29 @@ const studentSchema = new Schema<TStudent, TStudentModel>(
 );
 
 // Virtual data
-studentSchema.virtual('fullName').get(function () {
+facultySchema.virtual('fullName').get(function () {
   return `${this?.name?.firstName} ${this?.name?.middleName} ${this?.name?.lastName}`;
 });
 
 // Query Middleware
-studentSchema.pre('find', function (next) {
+facultySchema.pre('find', function (next) {
   this.find({ isDeleted: { $ne: true } });
   next();
 });
-studentSchema.pre('findOne', function (next) {
+facultySchema.pre('findOne', function (next) {
   this.find({ isDeleted: { $ne: true } });
   next();
 });
-studentSchema.pre('aggregate', function (next) {
+facultySchema.pre('aggregate', function (next) {
   this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
   next();
 });
 
 // creating a custom static method
 
-studentSchema.statics.isUserExists = async (id: string) => {
-  const existingUser = await Student.findOne({ id });
+facultySchema.statics.isUserExists = async (id: string) => {
+  const existingUser = await Faculty.findOne({ id });
   return existingUser;
 };
 
-export const Student = model<TStudent, TStudentModel>('Student', studentSchema);
+export const Faculty = model<TFaculty, TFacultyModel>('Faculty', facultySchema);

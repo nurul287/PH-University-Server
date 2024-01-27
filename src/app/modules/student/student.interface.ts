@@ -34,7 +34,6 @@ export interface TStudent {
   permanentAddress: string;
   guardian: TGuardian;
   email: string;
-  avatar?: string;
   localGuardian: TLocalGuardian;
   profileImg?: string;
   admissionSemester: Types.ObjectId;
@@ -46,14 +45,3 @@ export interface TStudent {
 export interface TStudentModel extends Model<TStudent> {
   isUserExists: (id: string) => Promise<TStudent | null>;
 }
-
-// for creating instance
-// export type TStudentMethods = {
-//   isUserExists: (id: string) => Promise<TStudent | null>;
-// };
-
-// export type TStudentModel = Model<
-//   TStudent,
-//   Record<string, never>,
-//   TStudentMethods
-// >;
