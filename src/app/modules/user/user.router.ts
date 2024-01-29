@@ -1,7 +1,7 @@
 import express from 'express';
 import validateRequest from '../../middlewares/validateRequest';
-import { adminValidations } from '../Admin/admin.validation';
-import { facultyValidations } from '../Faculty/faculty.validation';
+import { adminValidations } from '../admin/admin.validation';
+import { facultyValidations } from '../faculty/faculty.validation';
 import { studentValidations } from '../student/student.validation';
 import { UserControllers } from './user.controller';
 

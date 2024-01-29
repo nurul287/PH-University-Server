@@ -75,7 +75,7 @@ const updateAdminFromDB = async (id: string, payLoad: Partial<TAdmin>) => {
     }
   }
 
-  const result = await Admin.findById(id, modifiedUpdateData, {
+  const result = await Admin.findByIdAndUpdate(id, modifiedUpdateData, {
     new: true,
     runValidators: true,
   });

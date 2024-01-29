@@ -4,7 +4,7 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../errors/AppError';
 import { CourseSearchableFields } from './course.constant';
 import { TCourse } from './course.interface';
-import { Course } from './course.model';
+import { Course, CourseFaculty } from './course.model';
 
 const createCourseIntoDB = async (payLoad: TCourse) => {
   const result = await Course.create(payLoad);
@@ -96,10 +96,38 @@ const updateCourseIntoDB = async (id: string, payLoad: Partial<TCourse>) => {
   }
 };
 
+const assignFacultiesWithCourseIntoDB = async (
+  id: string,
+  payLoad: string[],
+) => {
+  const result = await CourseFaculty.findByIdAndUpdate(
+    id,
+    { courseId: id, $addToSet: { faculties: { $each: payLoad } } },
+    { upsert: true, new: true },
+  );
+
+  return result;
+};
+
+const removeFacultiesFromCourseFromDB = async (
+  id: string,
+  payLoad: string[],
+) => {
+  const result = await CourseFaculty.findByIdAndUpdate(
+    id,
+    { $pull: { faculties: { $in: payLoad } } },
+    { new: true },
+  );
+
+  return result;
+};
+
 export const CourseServices = {
   createCourseIntoDB,
   getAllCoursesFromDB,
   getSingleCourseFromDB,
   deleteCourseFromDB,
   updateCourseIntoDB,
+  assignFacultiesWithCourseIntoDB,
+  removeFacultiesFromCourseFromDB,
 };

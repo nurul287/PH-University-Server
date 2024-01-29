@@ -69,7 +69,7 @@ export const findLastAdminId = async () => {
 
 export const generateAdminId = async () => {
   let currentId = (0).toString();
-  const lastAdminId = await findLastFacultyId();
+  const lastAdminId = await findLastAdminId();
 
   if (lastAdminId) {
     currentId = lastAdminId.substring(2);
