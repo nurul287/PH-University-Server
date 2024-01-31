@@ -5,12 +5,14 @@ import { AcademicDepartment } from '../academicDepartment/academicDepartment.mod
 import { AcademicFaculty } from '../academicFaculty.ts/academicFaculty.model';
 import { Course } from '../course/course.model';
 import { Faculty } from '../faculty/faculty.model';
+import { RegistrationStatus } from '../semesterRegistration/semesterRegistration.constant';
 import { SemesterRegistration } from '../semesterRegistration/semesterRegistration.model';
 import {
   TOfferedCourse,
   TUpdateOfferedCourse,
 } from './offeredCourse.interface';
 import { OfferedCourse } from './offeredCourse.model';
+import { hasTimeConflict } from './offeredCourse.utils';
 
 const createOfferedCourseIntoDB = async (payLoad: TOfferedCourse) => {
   const {
@@ -20,6 +22,9 @@ const createOfferedCourseIntoDB = async (payLoad: TOfferedCourse) => {
     course,
     faculty,
     section,
+    days,
+    startTime,
+    endTime,
   } = payLoad;
   const isSemesterRegistrationExits =
     await SemesterRegistration.findById(semesterRegistration);
@@ -72,6 +77,26 @@ const createOfferedCourseIntoDB = async (payLoad: TOfferedCourse) => {
     );
   }
 
+  // get schedules of the faculties
+  const assignedSchedules = await OfferedCourse.find({
+    semesterRegistration,
+    faculty,
+    days: { $in: days },
+  })
+    .select('days startTime endTime')
+    .lean();
+  const newSchedule = {
+    days,
+    startTime,
+    endTime,
+  };
+
+  if (hasTimeConflict(assignedSchedules, newSchedule))
+    throw new AppError(
+      httpStatus.CONFLICT,
+      `This faculty is not available at that time! Choose other time or day"`,
+    );
+
   payLoad.academicSemester = isSemesterRegistrationExits.academicSemester;
 
   const result = await OfferedCourse.create(payLoad);
@@ -110,12 +135,73 @@ const getSingleOfferedCourseFromDB = async (id: string) => {
 
 const updateOfferedCourseIntoDB = async (
   id: string,
-  payLoad: Partial<TUpdateOfferedCourse>,
+  payLoad: TUpdateOfferedCourse,
 ) => {
+  const { faculty, days, startTime, endTime } = payLoad;
+
+  const isOfferedCourseExits = await OfferedCourse.findById(id);
+  if (!isOfferedCourseExits) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Offered course not found!');
+  }
+
+  const isFacultyExits = await Faculty.findById(faculty);
+  if (!isFacultyExits) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Faculty not found!');
+  }
+
+  // get schedules of the faculties
+  const { semesterRegistration } = isOfferedCourseExits;
+  const assignedSchedules = await OfferedCourse.find({
+    semesterRegistration,
+    faculty,
+    days: { $in: days },
+  })
+    .select('days startTime endTime')
+    .lean();
+  const newSchedule = {
+    days,
+    startTime,
+    endTime,
+  };
+  if (hasTimeConflict(assignedSchedules, newSchedule))
+    throw new AppError(
+      httpStatus.CONFLICT,
+      `This faculty is not available at that time! Choose other time or day"`,
+    );
+
+  // check semester registration status
+  const semesterRegistrationStatus =
+    await SemesterRegistration.findById(semesterRegistration).lean();
+  if (semesterRegistrationStatus?.status !== RegistrationStatus.UPCOMING) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `You can not update this offered course as it is ${semesterRegistrationStatus?.status}"`,
+    );
+  }
+
   const result = await OfferedCourse.findByIdAndUpdate(id, payLoad, {
     new: true,
     runValidators: true,
   });
+  return result;
+};
+
+const deleteOfferedCourseFromDB = async (id: string) => {
+  const isOfferedCourseExits = await OfferedCourse.findById(id);
+  if (!isOfferedCourseExits) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Offered course not found!');
+  }
+
+  const { semesterRegistration } = isOfferedCourseExits;
+  const semesterRegistrationStatus =
+    await SemesterRegistration.findById(semesterRegistration).lean();
+  if (semesterRegistrationStatus?.status !== RegistrationStatus.UPCOMING) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `Offered course can not delete! because the semester ${semesterRegistrationStatus?.status}"`,
+    );
+  }
+  const result = await OfferedCourse.findByIdAndDelete(id);
   return result;
 };
 
@@ -124,4 +210,5 @@ export const OfferedCourseServices = {
   getAllOfferedCourseFromDB,
   getSingleOfferedCourseFromDB,
   updateOfferedCourseIntoDB,
+  deleteOfferedCourseFromDB,
 };

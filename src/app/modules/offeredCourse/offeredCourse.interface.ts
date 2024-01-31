@@ -15,10 +15,9 @@ export type TOfferedCourse = {
   endTime: string;
 };
 
-export type TUpdateOfferedCourse = {
-  faculty: Types.ObjectId;
-  maxCapacity: number;
-  days: TDays[];
-  startTime: string;
-  endTime: string;
-};
+export type TUpdateOfferedCourse = Pick<
+  TOfferedCourse,
+  'faculty' | 'section' | 'days' | 'startTime' | 'endTime'
+>;
+
+export type TSchedule = { days: TDays[]; startTime: string; endTime: string };

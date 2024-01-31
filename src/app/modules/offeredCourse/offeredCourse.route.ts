@@ -12,6 +12,7 @@ router.post(
 );
 router.get('/', OfferedCourseControllers.getAllOfferedCourses);
 router.get('/:id', OfferedCourseControllers.getSingleOfferedCourse);
+router.delete('/:id', OfferedCourseControllers.deleteOfferedCourse);
 router.patch(
   '/:id',
   validateRequest(offeredCourseValidations.updateOfferedCourseValidationSchema),
