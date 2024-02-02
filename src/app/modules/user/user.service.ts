@@ -7,11 +7,12 @@ import { TAcademicSemester } from '../academicSemester/academicSemester.interfac
 import { AcademicSemester } from '../academicSemester/academicSemester.model';
 import { TAdmin } from '../admin/admin.interface';
 import { Admin } from '../admin/admin.model';
+import { TAuthUser } from '../auth/auth.interface';
 import { TFaculty } from '../faculty/faculty.interface';
 import { Faculty } from '../faculty/faculty.model';
 import { TStudent } from '../student/student.interface';
 import { Student } from '../student/student.model';
-import { TUser } from './user.interface';
+import { TUser, TUserStatus } from './user.interface';
 import { User } from './user.model';
 import {
   generateAdminId,
@@ -26,8 +27,9 @@ const createStudentIntoDB = async (payLoad: TStudent, password: string) => {
   // if password is not given, set default password
   userData.password = password || (config.default_password as string);
 
-  // set user role
+  // set user role and email
   userData.role = 'student';
+  userData.email = payLoad.email;
 
   // find academic semester info
   const admissionSemester = (await AcademicSemester.findById(
@@ -76,8 +78,9 @@ const createFacultyIntoDB = async (payLoad: TFaculty, password: string) => {
   // if password is not given, set default password
   userData.password = password || (config.default_password as string);
 
-  // set user role
+  // set user role and email
   userData.role = 'faculty';
+  userData.email = payLoad.email;
 
   // find academic department info
   const academicDepartment = (await AcademicDepartment.findById(
@@ -124,8 +127,9 @@ const createAdminIntoDB = async (payLoad: TAdmin, password: string) => {
   // if password is not given, set default password
   userData.password = password || (config.default_password as string);
 
-  // set user role
+  // set user role and email
   userData.role = 'admin';
+  userData.email = payLoad.email;
 
   const session = await mongoose.startSession();
   try {
@@ -158,8 +162,31 @@ const createAdminIntoDB = async (payLoad: TAdmin, password: string) => {
   }
 };
 
+const changeUserStatusIntoDB = async (
+  id: string,
+  payLoad: { status: TUserStatus },
+) => {
+  const result = await User.findByIdAndUpdate(id, payLoad, { new: true });
+  return result;
+};
+
+const getMeFromDB = async (payLoad: TAuthUser) => {
+  const { userId, role } = payLoad;
+  let result = null;
+  if (role === 'student') {
+    result = await Student.findOne({ id: userId });
+  } else if (role === 'faculty') {
+    result = await Faculty.findOne({ id: userId });
+  } else if (role === 'admin') {
+    result = await Admin.findOne({ id: userId });
+  }
+  return result;
+};
+
 export const UserServices = {
   createStudentIntoDB,
   createFacultyIntoDB,
   createAdminIntoDB,
+  getMeFromDB,
+  changeUserStatusIntoDB,
 };

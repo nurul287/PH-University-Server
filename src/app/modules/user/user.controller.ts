@@ -1,11 +1,11 @@
 import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
+import { TAuthUser } from '../auth/auth.interface';
 import { UserServices } from './user.service';
 
 const createStudent = catchAsync(async (req, res) => {
   const { password, student: studentData } = req.body;
-
   const result = await UserServices.createStudentIntoDB(studentData, password);
   sendResponse(res, {
     success: true,
@@ -17,7 +17,6 @@ const createStudent = catchAsync(async (req, res) => {
 
 const createFaculty = catchAsync(async (req, res) => {
   const { password, faculty: facultyData } = req.body;
-
   const result = await UserServices.createFacultyIntoDB(facultyData, password);
   sendResponse(res, {
     success: true,
@@ -29,7 +28,6 @@ const createFaculty = catchAsync(async (req, res) => {
 
 const createAdmin = catchAsync(async (req, res) => {
   const { password, admin: adminData } = req.body;
-
   const result = await UserServices.createAdminIntoDB(adminData, password);
   sendResponse(res, {
     success: true,
@@ -39,8 +37,31 @@ const createAdmin = catchAsync(async (req, res) => {
   });
 });
 
+const changeUserStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await UserServices.changeUserStatusIntoDB(id, req.body);
+  sendResponse(res, {
+    success: true,
+    message: 'User status is changed successfully',
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+});
+
+const getMe = catchAsync(async (req, res) => {
+  const result = await UserServices.getMeFromDB(req.user as TAuthUser);
+  sendResponse(res, {
+    success: true,
+    message: 'User is retrieve successfully',
+    data: result,
+    statusCode: httpStatus.OK,
+  });
+});
+
 export const UserControllers = {
   createStudent,
   createFaculty,
   createAdmin,
+  getMe,
+  changeUserStatus,
 };
