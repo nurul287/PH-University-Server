@@ -14,3 +14,7 @@ export type TChangePassword = {
   newPassword: string;
   oldPassword: string;
 };
+export type TResetPassword = {
+  newPassword: string;
+  id: string;
+};

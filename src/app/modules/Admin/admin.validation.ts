@@ -51,7 +51,6 @@ const updateAdminValidationSchema = z.object({
       designation: z.string().optional(),
       gender: z.enum([...Gender] as [string, ...string[]]).optional(),
       dateOfBirth: z.string().optional(),
-      email: z.string().email().optional(),
       contactNo: z.string().optional(),
       emergencyContactNo: z.string().optional(),
       bloodGroup: z.enum([...BloodGroup] as [string, ...string[]]).optional(),
