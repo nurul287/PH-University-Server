@@ -14,4 +14,6 @@ export default {
   jwt_access_expires_in: process.env.JWT_ACCESS_EXPIRES_IN,
   jwt_refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN,
   app_url: process.env.APP_URL,
+  clodinary_api_key: process.env.COUDINARY_API_KEY,
+  clodinary_api_secret: process.env.COUDINARY_API_SECRET,
 };

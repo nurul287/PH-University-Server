@@ -1,6 +1,8 @@
 import express from 'express';
 import auth from '../../middlewares/auth';
+import parseText from '../../middlewares/parseText';
 import validateRequest from '../../middlewares/validateRequest';
+import { upload } from '../../utils/sendImageToCloudinary';
 import { adminValidations } from '../admin/admin.validation';
 import { facultyValidations } from '../faculty/faculty.validation';
 import { studentValidations } from '../student/student.validation';
@@ -13,18 +15,22 @@ const router = express.Router();
 router.post(
   '/create-student',
   auth(USER_ROLE.admin),
+  upload.single('file'),
+  parseText,
   validateRequest(studentValidations.createStudentValidationSchema),
   UserControllers.createStudent,
 );
 router.post(
   '/create-faculty',
   auth(USER_ROLE.admin),
+  parseText,
   validateRequest(facultyValidations.createFacultyValidationSchema),
   UserControllers.createFaculty,
 );
 router.post(
   '/create-admin',
   // auth(USER_ROLE.admin),
+  parseText,
   validateRequest(adminValidations.createAdminValidationSchema),
   UserControllers.createAdmin,
 );

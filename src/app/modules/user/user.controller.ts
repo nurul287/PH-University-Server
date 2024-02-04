@@ -6,7 +6,11 @@ import { UserServices } from './user.service';
 
 const createStudent = catchAsync(async (req, res) => {
   const { password, student: studentData } = req.body;
-  const result = await UserServices.createStudentIntoDB(studentData, password);
+  const result = await UserServices.createStudentIntoDB(
+    req.file,
+    studentData,
+    password,
+  );
   sendResponse(res, {
     success: true,
     message: 'Student is created successfully',
@@ -17,7 +21,11 @@ const createStudent = catchAsync(async (req, res) => {
 
 const createFaculty = catchAsync(async (req, res) => {
   const { password, faculty: facultyData } = req.body;
-  const result = await UserServices.createFacultyIntoDB(facultyData, password);
+  const result = await UserServices.createFacultyIntoDB(
+    req.file,
+    facultyData,
+    password,
+  );
   sendResponse(res, {
     success: true,
     message: 'Faculty is created successfully',
@@ -28,7 +36,11 @@ const createFaculty = catchAsync(async (req, res) => {
 
 const createAdmin = catchAsync(async (req, res) => {
   const { password, admin: adminData } = req.body;
-  const result = await UserServices.createAdminIntoDB(adminData, password);
+  const result = await UserServices.createAdminIntoDB(
+    req.file,
+    adminData,
+    password,
+  );
   sendResponse(res, {
     success: true,
     message: 'admin is created successfully',

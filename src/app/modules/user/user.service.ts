@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import config from '../../config';
 import AppError from '../../errors/AppError';
+import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
 import { AcademicDepartment } from '../academicDepartment/academicDepartment.model';
 import { TAcademicSemester } from '../academicSemester/academicSemester.interface';
 import { AcademicSemester } from '../academicSemester/academicSemester.model';
@@ -20,7 +21,11 @@ import {
   generateStudentId,
 } from './user.utils';
 
-const createStudentIntoDB = async (payLoad: TStudent, password: string) => {
+const createStudentIntoDB = async (
+  file: any,
+  payLoad: TStudent,
+  password: string,
+) => {
   // create a user object
   const userData: Partial<TUser> = {};
 
@@ -46,6 +51,13 @@ const createStudentIntoDB = async (payLoad: TStudent, password: string) => {
     session.startTransaction();
     userData.id = await generateStudentId(admissionSemester);
 
+    //send image to coudinary
+    const imageName = `${userData.id}-${payLoad.name.firstName}`;
+    const { secure_url = '' } = await sendImageToCloudinary(
+      imageName,
+      file?.path,
+    );
+
     // create a user (transaction-1)
     const newUser = await User.create([userData], { session });
     if (!newUser.length) {
@@ -54,6 +66,7 @@ const createStudentIntoDB = async (payLoad: TStudent, password: string) => {
     // set id, _id as user
     payLoad.id = newUser[0].id;
     payLoad.user = newUser[0]._id;
+    payLoad.profileImg = secure_url as string;
 
     // create a student (transaction-2)
 
@@ -71,7 +84,11 @@ const createStudentIntoDB = async (payLoad: TStudent, password: string) => {
   }
 };
 
-const createFacultyIntoDB = async (payLoad: TFaculty, password: string) => {
+const createFacultyIntoDB = async (
+  file: any,
+  payLoad: TFaculty,
+  password: string,
+) => {
   // create a user object
   const userData: Partial<TUser> = {};
 
@@ -96,6 +113,12 @@ const createFacultyIntoDB = async (payLoad: TFaculty, password: string) => {
     session.startTransaction();
     userData.id = await generateFacultyId();
 
+    //send image to coudinary
+    const imageName = `${userData.id}-${payLoad.name.firstName}`;
+    const { secure_url = '' } = await sendImageToCloudinary(
+      imageName,
+      file?.path,
+    );
     // create a user (transaction-1)
     const newUser = await User.create([userData], { session });
     if (!newUser.length) {
@@ -104,6 +127,7 @@ const createFacultyIntoDB = async (payLoad: TFaculty, password: string) => {
     // set id, _id as user
     payLoad.id = newUser[0].id;
     payLoad.user = newUser[0]._id;
+    payLoad.profileImg = secure_url;
 
     // create a faculty (transaction-2)
 
@@ -120,7 +144,11 @@ const createFacultyIntoDB = async (payLoad: TFaculty, password: string) => {
     throw new Error(error);
   }
 };
-const createAdminIntoDB = async (payLoad: TAdmin, password: string) => {
+const createAdminIntoDB = async (
+  file: any,
+  payLoad: TAdmin,
+  password: string,
+) => {
   // create a user object
   const userData: Partial<TUser> = {};
 
@@ -137,6 +165,13 @@ const createAdminIntoDB = async (payLoad: TAdmin, password: string) => {
     session.startTransaction();
     userData.id = await generateAdminId();
 
+    //send image to coudinary
+    const imageName = `${userData.id}-${payLoad.name.firstName}`;
+    const { secure_url = '' } = await sendImageToCloudinary(
+      imageName,
+      file?.path,
+    );
+
     // create a user (transaction-1)
     const newUser = await User.create([userData], { session });
     if (!newUser.length) {
@@ -146,6 +181,7 @@ const createAdminIntoDB = async (payLoad: TAdmin, password: string) => {
     // set id, _id as user
     payLoad.id = newUser[0].id;
     payLoad.user = newUser[0]._id;
+    payLoad.profileImg = secure_url;
 
     // create a admin (transaction-2)
     const newAdmin = await Admin.create([payLoad], { session });
