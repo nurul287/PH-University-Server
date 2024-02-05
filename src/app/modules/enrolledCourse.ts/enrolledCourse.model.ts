@@ -2,24 +2,27 @@ import { Schema, model } from 'mongoose';
 import { Grade } from './enrolledCourse.constant';
 import { TCourseMarks, TEnrolledCourse } from './enrolledCourse.interface';
 
-const courseMarksSchema = new Schema<TCourseMarks>({
-  classTest1: {
-    type: Number,
-    default: 0,
+const courseMarksSchema = new Schema<TCourseMarks>(
+  {
+    classTest1: {
+      type: Number,
+      default: 0,
+    },
+    midTerm: {
+      type: Number,
+      default: 0,
+    },
+    classTest2: {
+      type: Number,
+      default: 0,
+    },
+    finalTerm: {
+      type: Number,
+      default: 0,
+    },
   },
-  midTerm: {
-    type: Number,
-    default: 0,
-  },
-  classTest2: {
-    type: Number,
-    default: 0,
-  },
-  finalTerm: {
-    type: Number,
-    default: 0,
-  },
-});
+  { _id: false },
+);
 
 const enrolledCourseSchema = new Schema<TEnrolledCourse>(
   {
@@ -65,10 +68,11 @@ const enrolledCourseSchema = new Schema<TEnrolledCourse>(
     },
     isEnrolled: {
       type: Boolean,
-      required: true,
+      default: true,
     },
     courseMarks: {
       type: courseMarksSchema,
+      default: {},
     },
     grade: {
       type: String,
