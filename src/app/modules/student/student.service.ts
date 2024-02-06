@@ -24,8 +24,13 @@ const getAllStudentsFromBD = async (query: Record<string, unknown>) => {
     .sort()
     .paginate()
     .fields();
+
   const result = await studentQuery.modelQuery;
-  return result;
+  const meta = await studentQuery.countTotal();
+  return {
+    meta,
+    result,
+  };
 };
 
 const getSingleStudentFromBD = async (id: string) => {
@@ -39,6 +44,7 @@ const getSingleStudentFromBD = async (id: string) => {
     });
   return result;
 };
+
 const deleteStudentFromBD = async (id: string) => {
   const session = await mongoose.startSession();
   try {

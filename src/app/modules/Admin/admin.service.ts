@@ -14,8 +14,11 @@ const getAllAdminsFromBD = async (query: Record<string, unknown>) => {
     .sort()
     .paginate()
     .fields();
+
   const result = await adminQuery.modelQuery;
-  return result;
+  const meta = await adminQuery.countTotal();
+
+  return { meta, result };
 };
 
 const getSingleAdminFromBD = async (id: string) => {
