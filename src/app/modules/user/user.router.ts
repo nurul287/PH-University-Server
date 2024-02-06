@@ -23,6 +23,7 @@ router.post(
 router.post(
   '/create-faculty',
   auth(USER_ROLE.admin),
+  upload.single('file'),
   parseText,
   validateRequest(facultyValidations.createFacultyValidationSchema),
   UserControllers.createFaculty,
@@ -30,6 +31,7 @@ router.post(
 router.post(
   '/create-admin',
   // auth(USER_ROLE.admin),
+  upload.single('file'),
   parseText,
   validateRequest(adminValidations.createAdminValidationSchema),
   UserControllers.createAdmin,
