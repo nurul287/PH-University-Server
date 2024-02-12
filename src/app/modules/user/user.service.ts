@@ -29,7 +29,7 @@ const createStudentIntoDB = async (
   // create a user object
   const userData: Partial<TUser> = {};
 
-  // if password is not given, set default password
+  // if password is not given, set a default password
   userData.password = password || (config.default_password as string);
 
   // set user role and email
@@ -41,8 +41,16 @@ const createStudentIntoDB = async (
     payLoad.admissionSemester,
   )) as TAcademicSemester;
   if (!admissionSemester) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Academic semester not found');
+    throw new AppError(httpStatus.NOT_FOUND, 'Admission semester not found');
   }
+  // find department;
+  const academicDepartment = await AcademicDepartment.findById(
+    payLoad.academicDepartment,
+  );
+  if (!academicDepartment) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Academic department not found');
+  }
+  payLoad.academicFaculty = academicDepartment.academicFaculty;
 
   const session = await mongoose.startSession();
 
@@ -52,11 +60,12 @@ const createStudentIntoDB = async (
     userData.id = await generateStudentId(admissionSemester);
 
     //send image to coudinary
-    const imageName = `${userData.id}-${payLoad.name.firstName}`;
-    const { secure_url = '' } = await sendImageToCloudinary(
-      imageName,
-      file?.path,
-    );
+    if (file) {
+      const imageName = `${userData.id}-${payLoad.name.firstName}`;
+      const { secure_url } =
+        (await sendImageToCloudinary(imageName, file?.path)) ?? {};
+      payLoad.profileImg = secure_url || '';
+    }
 
     // create a user (transaction-1)
     const newUser = await User.create([userData], { session });
@@ -66,10 +75,8 @@ const createStudentIntoDB = async (
     // set id, _id as user
     payLoad.id = newUser[0].id;
     payLoad.user = newUser[0]._id;
-    payLoad.profileImg = secure_url as string;
 
     // create a student (transaction-2)
-
     const newStudent = await Student.create([payLoad], { session });
     if (!newStudent.length) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student');
@@ -114,11 +121,13 @@ const createFacultyIntoDB = async (
     userData.id = await generateFacultyId();
 
     //send image to coudinary
-    const imageName = `${userData.id}-${payLoad.name.firstName}`;
-    const { secure_url = '' } = await sendImageToCloudinary(
-      imageName,
-      file?.path,
-    );
+    if (file) {
+      const imageName = `${userData.id}-${payLoad.name.firstName}`;
+      const { secure_url } =
+        (await sendImageToCloudinary(imageName, file?.path)) ?? {};
+      payLoad.profileImg = secure_url || '';
+    }
+
     // create a user (transaction-1)
     const newUser = await User.create([userData], { session });
     if (!newUser.length) {
@@ -127,7 +136,6 @@ const createFacultyIntoDB = async (
     // set id, _id as user
     payLoad.id = newUser[0].id;
     payLoad.user = newUser[0]._id;
-    payLoad.profileImg = secure_url;
 
     // create a faculty (transaction-2)
 
@@ -166,11 +174,12 @@ const createAdminIntoDB = async (
     userData.id = await generateAdminId();
 
     //send image to coudinary
-    const imageName = `${userData.id}-${payLoad.name.firstName}`;
-    const { secure_url = '' } = await sendImageToCloudinary(
-      imageName,
-      file?.path,
-    );
+    if (file) {
+      const imageName = `${userData.id}-${payLoad.name.firstName}`;
+      const { secure_url } =
+        (await sendImageToCloudinary(imageName, file?.path)) ?? {};
+      payLoad.profileImg = secure_url || '';
+    }
 
     // create a user (transaction-1)
     const newUser = await User.create([userData], { session });
@@ -181,7 +190,6 @@ const createAdminIntoDB = async (
     // set id, _id as user
     payLoad.id = newUser[0].id;
     payLoad.user = newUser[0]._id;
-    payLoad.profileImg = secure_url;
 
     // create a admin (transaction-2)
     const newAdmin = await Admin.create([payLoad], { session });
