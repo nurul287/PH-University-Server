@@ -12,7 +12,7 @@ const createAcademicFaculty = catchAsync(async (req, res) => {
     success: true,
     message: 'Academic faculty is created successfully',
     data: result,
-    statusCode: httpStatus.OK,
+    statusCode: httpStatus.CREATED,
   });
 });
 
