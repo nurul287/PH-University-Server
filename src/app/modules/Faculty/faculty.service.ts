@@ -9,7 +9,7 @@ import { Faculty } from './faculty.model';
 
 const getAllFacultiesFromBD = async (query: Record<string, unknown>) => {
   const facultyQuery = new QueryBuilder(
-    Faculty.find().populate('academicDepartment'),
+    Faculty.find().populate('academicDepartment academicFaculty'),
     query,
   )
     .search(FacultySearchableFields)
@@ -24,7 +24,9 @@ const getAllFacultiesFromBD = async (query: Record<string, unknown>) => {
 };
 
 const getSingleFacultyFromBD = async (id: string) => {
-  const result = await Faculty.findById(id).populate('academicDepartment');
+  const result = await Faculty.findById(id).populate(
+    'academicDepartment academicFaculty',
+  );
   return result;
 };
 

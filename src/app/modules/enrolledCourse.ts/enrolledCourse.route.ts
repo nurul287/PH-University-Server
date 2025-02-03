@@ -9,10 +9,10 @@ const router = express.Router();
 
 router.post(
   '/create-enrolled-course',
+  auth(USER_ROLE.student),
   validateRequest(
     EnrolledCourseValidation.createEnrolledCourseValidationSchema,
   ),
-  auth(USER_ROLE.student),
   EnrolledCourseControllers.createEnrolledCourse,
 );
 
@@ -24,10 +24,10 @@ router.get(
 
 router.patch(
   '/update-enrolled-course-marks',
+  auth(USER_ROLE.faculty, USER_ROLE.superAdmin, USER_ROLE.admin),
   validateRequest(
     EnrolledCourseValidation.updateEnrolledCourseMarksValidationSchema,
   ),
-  auth(USER_ROLE.faculty),
   EnrolledCourseControllers.updateEnrolledCourseMarks,
 );
 

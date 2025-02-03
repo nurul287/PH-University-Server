@@ -16,4 +16,5 @@ export default {
   app_url: process.env.APP_URL,
   clodinary_api_key: process.env.COUDINARY_API_KEY,
   clodinary_api_secret: process.env.COUDINARY_API_SECRET,
+  super_admin_password: process.env.SUPER_ADMIN_PASSWORD,
 };

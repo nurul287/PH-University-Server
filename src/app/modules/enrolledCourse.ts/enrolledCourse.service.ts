@@ -228,11 +228,9 @@ const updateEnrolledCourseMarksIntoDB = async (
   if (courseMarks?.finalTerm) {
     const { classTest1, midTerm, classTest2 } =
       isCourseBelongToFaculty.courseMarks as TEnrolledCourseMarks;
-    const totalMarks =
-      Math.ceil(classTest1 * 0.1) +
-      Math.ceil(midTerm * 0.3) +
-      Math.ceil(classTest2 + 0.1) +
-      Math.ceil(courseMarks.finalTerm * 0.5);
+    const totalMarks = Math.ceil(
+      classTest1 + midTerm + classTest2 + courseMarks.finalTerm,
+    );
     const { grade, gradePoints } = calculateGradeAndPoints(totalMarks);
     modifiedData.grade = grade;
     modifiedData.gradePoints = gradePoints;

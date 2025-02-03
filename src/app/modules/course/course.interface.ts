@@ -15,6 +15,6 @@ export type TCourse = {
 };
 
 export type TCourseFaculty = {
-  courseId: Types.ObjectId;
+  course: Types.ObjectId;
   faculties: Types.ObjectId[];
 };
