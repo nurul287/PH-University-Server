@@ -19,7 +19,8 @@ const getAllCourses = catchAsync(async (req, res) => {
   sendResponse(res, {
     success: true,
     message: 'Courses are retrieved successfully',
-    data: result,
+    data: result.result,
+    meta: result.meta,
     statusCode: httpStatus.OK,
   });
 });

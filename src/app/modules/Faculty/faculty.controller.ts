@@ -8,7 +8,8 @@ const getAllFaculties = catchAsync(async (req, res) => {
   sendResponse(res, {
     success: true,
     message: 'Faculties are retrieved successfully',
-    data: result,
+    data: result.result,
+    meta: result.meta,
     statusCode: httpStatus.OK,
   });
 });

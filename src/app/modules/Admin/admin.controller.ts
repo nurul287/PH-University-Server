@@ -8,7 +8,8 @@ const getAllAdmins = catchAsync(async (req, res) => {
   sendResponse(res, {
     success: true,
     message: 'Admins are retrieved successfully',
-    data: result,
+    data: result.result,
+    meta: result.meta,
     statusCode: httpStatus.OK,
   });
 });
