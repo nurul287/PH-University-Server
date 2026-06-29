@@ -1,0 +1,77 @@
+---
+description: Project conventions and architecture for the PH University Server (TypeScript + Express + Mongoose API). Apply to all work in this repo.
+globs:
+  - "src/**/*.ts"
+alwaysApply: true
+---
+
+# PH University Server — Agent Rules
+
+You are working on a TypeScript + Express + MongoDB (Mongoose) REST API for a
+university management system. Follow the conventions below precisely — match the
+existing code, do not introduce new patterns or libraries without good reason.
+
+## Architecture
+
+Layered + modular. The request flow is:
+
+`route → auth() → validateRequest(zodSchema) → controller → service → model`
+
+- **Controllers are thin.** They only read the request, call a service, and send a
+  response. No business logic, no direct DB access.
+- **Services hold business logic and all database access** (Mongoose calls).
+- **Models** define Mongoose schemas/statics in `*.model.ts`.
+- **Validation** lives in `*.validation.ts` as Zod schemas and is applied via the
+  `validateRequest` middleware in the route — never validate inside controllers.
+
+## Module structure
+
+Each feature lives in `src/app/modules/<name>/` and is split into:
+
+```
+<module>.interface.ts   # TypeScript types
+<module>.model.ts       # Mongoose schema/model
+<module>.validation.ts  # Zod schemas
+<module>.controller.ts  # Request handlers (wrapped in catchAsync)
+<module>.service.ts     # Business logic + DB access
+<module>.route.ts       # Express routes (router.* ) — exported as <Name>Routes
+<module>.constant.ts    # (optional) constants
+<module>.utils.ts       # (optional) helpers
+```
+
+When adding a new module, replicate this structure and register its routes in
+`src/app/routes/index.ts`.
+
+> Note: two existing folders are named with a trailing `.ts`
+> (`academicFaculty.ts/`, `enrolledCourse.ts/`). This is an existing quirk — do
+> not "fix" it in unrelated changes, as imports depend on it.
+
+## Mandatory conventions
+
+- **Always wrap async controllers in `catchAsync`** (`src/app/utils/catchAsync.ts`).
+- **Always send responses via `sendResponse`** (`src/app/utils/sendResponse.ts`)
+  with `statusCode`, `success`, `message`, and `data`.
+- **Throw `AppError`** (`src/app/errors/AppError.ts`) with an `http-status` code
+  for expected errors — never `res.status().json()` directly inside services.
+- **Use `httpStatus`** from the `http-status` package for status codes.
+- **Protect routes with `auth(...roles)`** using `USER_ROLE` from
+  `src/app/modules/user/user.constant.ts`. Roles: `superAdmin`, `admin`,
+  `faculty`, `student`.
+- **List/query endpoints should use `QueryBuilder`** (`src/app/builder/QueryBuilder.ts`)
+  for search, filter, sort, pagination, and field selection.
+- **Read configuration from `config`** (`src/app/config`) — never read
+  `process.env` directly elsewhere.
+
+## Style
+
+- TypeScript strict-ish; follow `.eslintrc.json` and `.prettierrc.json`.
+- Prefer `const`; avoid `console.log` in committed code (`no-console` is a warning).
+- Keep imports ordered the way the existing files do (external, then internal).
+- Run `npm run lint` and `npm run prettier` before finishing.
+
+## Do not
+
+- Do not add controllers that talk to Mongoose directly.
+- Do not skip Zod validation for endpoints that accept a body.
+- Do not hardcode secrets — use environment variables via `config`.
+- Do not introduce a new ORM, validation library, or HTTP framework.
