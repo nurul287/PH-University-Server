@@ -1,7 +1,7 @@
 {
-  "name": "first-project",
+  "name": "ph-university-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend REST API for a university management system, built with TypeScript, Express, and MongoDB (Mongoose).",
   "main": "index.js",
   "scripts": {
     "start:dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
